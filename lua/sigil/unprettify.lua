@@ -58,8 +58,7 @@ local function restore_symbols(buf)
 			local col = mark[3]
 			local end_col = mark[4].end_col or (col + 1)
 
-			local virt_text_entry = sym.hl_group and { sym.replacement, sym.hl_group }
-				or { sym.replacement }
+			local virt_text_entry = sym.hl_group and { sym.replacement, sym.hl_group } or { sym.replacement }
 			pcall(vim.api.nvim_buf_set_extmark, buf, state.ns, row, col, {
 				id = sym.id,
 				end_col = end_col,

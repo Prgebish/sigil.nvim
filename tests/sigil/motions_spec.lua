@@ -447,6 +447,23 @@ describe("sigil.motions", function()
 			assert.equals("x -> y", line)
 			assert.equals(termcodes("<BS>"), res)
 		end)
+
+		it("should translate keycodes returned by the original expr mapping", function()
+			pcall(vim.keymap.del, "i", "<BS>")
+			vim.keymap.set("i", "<BS>", function()
+				return "<BS>"
+			end, { expr = true })
+
+			motions.setup_keymaps(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 5 })
+			local res = motions.insert_backspace()
+
+			motions.remove_keymaps(buf)
+			pcall(vim.keymap.del, "i", "<BS>")
+
+			assert.equals(termcodes("<BS>"), res)
+			assert.not_equals("<BS>", res)
+		end)
 	end)
 
 	describe("substitute_char", function()

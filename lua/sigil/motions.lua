@@ -706,22 +706,36 @@ end
 ---@param buf integer
 ---@param key string
 ---@return string
+local function normalize_mapping_result(orig, result)
+	if result == nil then
+		return ""
+	end
+	if type(result) ~= "string" then
+		result = tostring(result)
+	end
+	if result == "" then
+		return ""
+	end
+	if orig.replace_keycodes == 1 or orig.replace_keycodes == true then
+		return vim.api.nvim_replace_termcodes(result, true, false, true)
+	end
+	return result
+end
+
 local function call_original_mapping(buf, key)
 	local orig = original_mappings[buf] and original_mappings[buf][key]
 	if orig then
 		if orig.callback then
 			local ok, result = pcall(orig.callback)
-			if ok and result and result ~= "" then
-				-- Callback returned terminal codes directly
-				return result
+			if ok then
+				return normalize_mapping_result(orig, result)
 			end
 		elseif orig.rhs and orig.rhs ~= "" then
 			if orig.expr == 1 then
 				-- Original mapping is also expr, evaluate it
 				local ok, result = pcall(vim.fn.eval, orig.rhs)
-				if ok and result and result ~= "" then
-					-- Expr returned terminal codes directly
-					return result
+				if ok then
+					return normalize_mapping_result(orig, result)
 				end
 			else
 				-- Non-expr mapping, convert to terminal codes
